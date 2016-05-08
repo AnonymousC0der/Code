@@ -5,5 +5,5 @@ public interface Character {
 	public void moveRight();
 	public void jump();
 	public void fall();
-	//niggas
+	
 }
