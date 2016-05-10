@@ -1,56 +1,119 @@
+package javagame.entities;
 
-public class Player implements Character{
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.util.List;
 
-	private int xpos;
-	private int ypos;
-	private int xvel;
-	private int yvel;
+import javagame.main.GamePanel;
+import javagame.objects.Block;
+
+public class Player {
 	
-	public Player(int x, int y, int xvel, int yvel){
-		xpos = x;
-		ypos = y;
-		this.xvel = xvel;
-		this.yvel = yvel;
+	//movement
+	private boolean right = false, left = false, jumping = false, falling = false;
+	
+	//bounds
+	private double x, y;
+	private int width, height;
+	
+	//velocity
+	private int xvel = 1;
+	private int yvel = 1;
+	
+	//jump speed
+	private double jumpSpeed = 5;
+	private double currentJumpSpeed = jumpSpeed;
+	
+	//fall speed
+	private double maxFallSpeed = 2;
+	private double currentFallSpeed = 0.1;
+	
+	public Player(int width, int height){
+		x = GamePanel.WIDTH / 2;
+		y = GamePanel.HEIGHT / 2;
+		this.width = width;
+		this.height = height;
 	}
 	
-	@Override
-	public void moveLeft() {
-		xpos -= xvel;
+	public void tick(){
+		
+		int iX = (int)x;
+		int iY = (int)y;
+		
+		
+		if(right){
+			x+= xvel;
+		}
+		if(left){
+			x-= xvel;
+		}
+		
+		
+		if(jumping){
+			y -= currentJumpSpeed;
+			
+			currentJumpSpeed -= 0.1;
+			
+			if(currentJumpSpeed <= 0){
+				currentJumpSpeed = jumpSpeed;
+				jumping = false;
+				falling = true;
+			}
+		}
+		if(falling){
+			y+= currentFallSpeed;
+			
+			if(currentFallSpeed < maxFallSpeed){
+				currentFallSpeed += 0.1;
+			}
+		}
+		if (!falling){
+			currentFallSpeed = 0.1;
+		}
+		
+		
+		
+	}
+	
+	public void draw(Graphics g){
+		g.setColor(Color.BLACK);
+		g.fillRect((int)x, (int)y, width, height);
+	}
+	
+	public void keyPressed(int k){
+		if(k == KeyEvent.VK_D) right = true;
+		if(k == KeyEvent.VK_A) left = true;
+		if(k == KeyEvent.VK_SPACE) jumping = true;
+	}
+	
+	public void keyReleased(int k){
+		if(k == KeyEvent.VK_D) right = false;
+		if(k == KeyEvent.VK_A) left = false;
+	}
+	
+	public void collision(Block b){
+		int iX = (int)x;
+		int iY = (int)y;
+		
+		//check bottom side
+		if (b.intersectsLine(iX + 2, iY + height, iX + width - 2, iY + height)){ falling = false; }
+		else{ falling = true; }
+		
+		//check left side
+		if (b.intersectsLine(iX, iY + 1, iX, iY + height - 2)){ xvel = 0; }
+		else{ xvel = 1; }
+		
+		//check right side
+		if (b.intersectsLine(iX + width, iY + 1, iX + width, iY + height - 2)){ xvel = 0; }
+		else{ xvel = 1; }
 		
 	}
 
-	@Override
-	public void moveRight() {
-		xpos += xvel;
-		
-	}
-
-	@Override
-	public void jump() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void fall() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public int getX(){
-		return xpos;
-	}
-	
-	public int getY(){
-		return ypos;
-	}
-	
-	public int getXvel(){
-		return xvel;
-	}
-	
-	public int getYvel(){
-		return yvel;
+	public void setFalling(boolean b){
+		falling = b;
 	}
 
 }
